@@ -1,6 +1,6 @@
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
@@ -12,36 +12,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 class TextPayload(BaseModel):
     text: str
 
 
 def interpret_score(score: float):
     if score >= 0.75:
-        return {
-            "confidence": "High",
-            "explanation": "The text strongly matches known sources or common patterns."
-        }
+        return {"confidence": "High", "explanation": "Strong similarity detected."}
     elif score >= 0.40:
-        return {
-            "confidence": "Medium",
-            "explanation": "The text shows partial similarity and may need review."
-        }
+        return {"confidence": "Medium", "explanation": "Partial similarity detected."}
     else:
-        return {
-            "confidence": "Low",
-            "explanation": "The text appears mostly original with minimal overlap."
-        }
+        return {"confidence": "Low", "explanation": "Mostly original content."}
 
 
 @app.post("/analyze")
 def analyze_text(payload: TextPayload):
-    text = payload.text
-
-    # Temporary scoring logic (placeholder)
-    score = min(len(text) / 500, 1.0)
-
+    score = min(len(payload.text) / 500, 1.0)
     interpretation = interpret_score(score)
 
     return {
@@ -52,5 +38,5 @@ def analyze_text(payload: TextPayload):
 
 
 @app.get("/")
-def health_check():
+def root():
     return {"status": "API is running"}

@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Integrity Checker",
+  "description": "Analyze selected text using Integrity API",
+  "version": "1.0",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": ["activeTab", "scripting"]
+}

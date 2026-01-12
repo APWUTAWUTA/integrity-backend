@@ -4,39 +4,41 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+# Allow Chrome extension
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-class TextPayload(BaseModel):
+class AnalyzeRequest(BaseModel):
     text: str
-
-
-def interpret_score(score: float):
-    if score >= 0.75:
-        return {"confidence": "High", "explanation": "Strong similarity detected."}
-    elif score >= 0.40:
-        return {"confidence": "Medium", "explanation": "Partial similarity detected."}
-    else:
-        return {"confidence": "Low", "explanation": "Mostly original content."}
-
-
-@app.post("/analyze")
-def analyze_text(payload: TextPayload):
-    score = min(len(payload.text) / 500, 1.0)
-    interpretation = interpret_score(score)
-
-    return {
-        "score": round(score, 2),
-        "confidence": interpretation["confidence"],
-        "explanation": interpretation["explanation"]
-    }
-
 
 @app.get("/")
 def root():
-    return {"status": "API is running"}
+    return {"status": "ok"}
+
+@app.post("/analyze")
+def analyze(req: AnalyzeRequest):
+    text = req.text.strip()
+    length = len(text)
+
+    # SIMPLE similarity proxy (placeholder logic)
+    similarity = min(round(length / 500, 2), 1.0)
+
+    if similarity >= 0.75:
+        confidence = "High"
+        explanation = "Text is very similar to known patterns."
+    elif similarity >= 0.4:
+        confidence = "Medium"
+        explanation = "Text shows partial similarity."
+    else:
+        confidence = "Low"
+        explanation = "Text appears mostly original."
+
+    return {
+        "similarity": similarity,
+        "confidence": confidence,
+        "explanation": explanation
+    }

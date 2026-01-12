@@ -27,12 +27,22 @@ document.getElementById("check").addEventListener("click", async () => {
         );
 
         const data = await response.json();
+        console.log("API response:", data);
 
-        document.getElementById("result").innerHTML = `
-          <strong>Score:</strong> ${data.score}<br>
-          <strong>Confidence:</strong> ${data.confidence}<br>
-          <em>${data.explanation}</em>
-        `;
+
+        const color =
+  data.confidence === "High" ? "green" :
+  data.confidence === "Medium" ? "orange" :
+  "red";
+
+document.getElementById("result").innerHTML = `
+  <strong>Score:</strong> ${data.score}<br>
+  <strong style="color:${color}">
+    Confidence: ${data.confidence}
+  </strong><br>
+  <em>${data.explanation}</em>
+`;
+
       } catch (err) {
         document.getElementById("result").innerText = "Error contacting API.";
       }

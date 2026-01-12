@@ -1,55 +1,46 @@
 from fastapi import FastAPI
-import random
-import re
+from pydantic import BaseModel
 
 app = FastAPI()
 
-@app.get("/")
-def home():
-    return {"status": "Backend is running (cloud)"}
+class TextPayload(BaseModel):
+    text: str
 
-def ai_score(sentence: str):
-    words = sentence.split()
-    length = len(words)
 
-    score = 0.2  # base score
+def interpret_score(score: float):
+    if score >= 0.75:
+        return {
+            "confidence": "High",
+            "explanation": "The text strongly matches known sources or common patterns."
+        }
+    elif score >= 0.40:
+        return {
+            "confidence": "Medium",
+            "explanation": "The text shows partial similarity and may need review."
+        }
+    else:
+        return {
+            "confidence": "Low",
+            "explanation": "The text appears mostly original with minimal overlap."
+        }
 
-    # Long sentences → more likely AI
-    if length > 20:
-        score += 0.3
-    if length > 35:
-        score += 0.2
-
-    # Repetitive wording
-    unique_ratio = len(set(words)) / max(len(words), 1)
-    if unique_ratio < 0.6:
-        score += 0.2
-
-    # Too perfect punctuation
-    if sentence.count(",") > 3:
-        score += 0.1
-
-    return round(min(score, 0.95), 2)
 
 @app.post("/analyze")
-def analyze(data: dict):
-    text = data.get("text", "")
+def analyze_text(payload: TextPayload):
+    text = payload.text
 
-    # split into sentences (simple but effective)
-    sentences = re.split(r'(?<=[.!?])\s+', text)
+    # Temporary scoring logic (placeholder)
+    score = min(len(text) / 500, 1.0)
 
-    results = []
-
-    for i, sentence in enumerate(sentences):
-        results.append({
-            "id": i,
-            "sentence": sentence,
-            "ai_probability": ai_score(sentence),
-            "plagiarism_similarity": round(len(sentence) / 100, 2)
-        })
-
+    interpretation = interpret_score(score)
 
     return {
-        "sentence_count": len(results),
-        "results": results
+        "score": round(score, 2),
+        "confidence": interpretation["confidence"],
+        "explanation": interpretation["explanation"]
     }
+
+
+@app.get("/")
+def health_check():
+    return {"status": "API is running"}

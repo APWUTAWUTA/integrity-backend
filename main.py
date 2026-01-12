@@ -4,7 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# Allow Chrome extension
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,30 +14,39 @@ app.add_middleware(
 class AnalyzeRequest(BaseModel):
     text: str
 
-@app.get("/")
-def root():
-    return {"status": "ok"}
-
 @app.post("/analyze")
 def analyze(req: AnalyzeRequest):
     text = req.text.strip()
     length = len(text)
 
-    # SIMPLE similarity proxy (placeholder logic)
-    similarity = min(round(length / 500, 2), 1.0)
+    # --- TEMP similarity logic (placeholder) ---
+    similarity_ratio = min(length / 500, 1.0)
+    similarity_percent = int(similarity_ratio * 100)
 
-    if similarity >= 0.75:
+    if similarity_percent >= 75:
         confidence = "High"
-        explanation = "Text is very similar to known patterns."
-    elif similarity >= 0.4:
+        explanation = "High similarity detected with existing content."
+    elif similarity_percent >= 40:
         confidence = "Medium"
-        explanation = "Text shows partial similarity."
+        explanation = "Partial similarity detected."
     else:
         confidence = "Low"
         explanation = "Text appears mostly original."
 
+    # --- MOCK SOURCES (next phase will make real) ---
+    sources = []
+    if similarity_percent >= 40:
+        sources = [
+            {
+                "title": "Example Article",
+                "url": "https://example.com/article",
+                "match_percent": similarity_percent
+            }
+        ]
+
     return {
-        "similarity": similarity,
+        "similarity_percent": similarity_percent,
         "confidence": confidence,
-        "explanation": explanation
+        "explanation": explanation,
+        "sources": sources
     }
